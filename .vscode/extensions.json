@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "analytic-signal.preview-pdf",
+        "rust-lang.rust-analyzer"
+    ]
+}
