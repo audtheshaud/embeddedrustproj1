@@ -1,5 +1,5 @@
-# Embedded Rust Project 1: Using the Peripheral Access Crate
-### Utilizing my  PICO-ICE (RP2040 ICE40UP5K), I am going to use "unsafe" Rust through the form of the PAC (Peripheral Access Crate) to blink the blue LED on GPIO pin 15 of the PICO-ICE
+# Embedded Rust Project 1: Using direct address control through the schematic
+### Utilizing my  PICO-ICE (RP2040 ICE40UP5K), I am going to use "unsafe" Rust through the form of the direct address control to blink the blue LED on GPIO pin 15 of the PICO-ICE
 
 
 ### How does this work?
