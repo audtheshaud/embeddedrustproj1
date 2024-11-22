@@ -12,7 +12,9 @@ GPIO Pins used: GPIO 15 of the RP2040, which was found on the schemati included 
 #![no_main] // Removes main() as the program entry point
 
 use ::cortex_m_rt::entry; // Set the entry point
-use ::panic_halt as _;
+use ::panic_halt as _; // Minimum panic_halt
+
+use core::ptr::write_volatile;
 
 #[entry]
 fn main() -> ! {
