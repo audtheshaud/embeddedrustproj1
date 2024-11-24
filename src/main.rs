@@ -13,11 +13,12 @@ The blue led turns on when the logic level is set to low on GPIO pin 15 (Annode)
 #![no_std] // Removes the std library
 #![no_main] // Removes main() as the program entry point
 
-use cortex_m::asm::nop;
-use cortex_m_rt::entry; // Set the entry point
-use panic_halt as _; // Minimum panic_halt // nop(); asm command
+use cortex_m::asm::nop; // nop(); asm command
+use cortex_m_rt::entry;
+use panic_halt as _; // Minimum panic_halt
 
 use core::ptr::write_volatile;
+const GPIO_OE_SET: usize = 0x24;
 const GPIO_OUT_SET: usize = 0x14;
 const GPIO_OUT_CLR: usize = 0x18;
 const SIO_BASE_ADDR: usize = 0xD0000000;
@@ -28,24 +29,29 @@ const FUNC_GPIO_CLR: *mut u32 = (SIO_BASE_ADDR + GPIO_OUT_CLR) as *mut u32;
 
 const IO_BANK0: usize = 0x40014000;
 const GPIO15_CTRL: usize = 0x7C;
+const GPIO_15: usize = 15;
 
 #[entry]
 fn main() -> ! {
     unsafe {
-        
-        let gpio_use_sio = (IO_BANK0 + GPIO15_CTRL) as *mut u32; // Get the memory address using the IO_BANKO 0x40014000 and GPIO15_CTRL 0x7C
-        *gpio_use_sio = 0x5; // FUNCSEL = 5 for SIO
+        write_volatile((IO_BANK0 + GPIO15_CTRL) as *mut u32, 0x5); // Set SIO function of the GPIO pin 15 function MUX by setting value to 5
+        write_volatile((SIO_BASE_ADDR + GPIO_OE_SET) as *mut u32, 1 << GPIO_15); // Set GPIO pin 15 output
     }
     loop {
         // Turn GPIO15 (LED) ON
-        unsafe { GPIO_OUT_CLR.write_volatile(1 << 15); }
+        unsafe { write_volatile(FUNC_GPIO_SET, 1 << GPIO_15); } // Writes a 1 to clear the output of GPIO15
 
         // Delay
         for _ in 0..100_000 {
-            cortex_m::asm::nop();
+            nop();
         }
 
         // Turn GPIO15 (LED) OFF
-        unsafe { GPIO_OUT_SET.write_volatile(1 << 15); }
+        unsafe {write_volatile(FUNC_GPIO_CLR, 1 << GPIO_15); } // Writes a 1 to set the output of GPIO15
+
+        // Delay
+        for _ in 0..100_000 {
+            nop();
+        }
     }
 }
