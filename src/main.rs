@@ -18,18 +18,34 @@ use cortex_m_rt::entry; // Set the entry point
 use panic_halt as _; // Minimum panic_halt // nop(); asm command
 
 use core::ptr::write_volatile;
-
+const GPIO_OUT_SET: usize = 0x14;
+const GPIO_OUT_CLR: usize = 0x18;
 const SIO_BASE_ADDR: usize = 0xD0000000;
-const GPIO_SET: *mut u32 = (SIO_BASE_ADDR + 0x14) as *mut u32;
-const GPIO_CLR: *mut u32 = (SIO_BASE_ADDR + 0x18) as *mut u32;
+
+const FUNC_GPIO_SET: *mut u32 = (SIO_BASE_ADDR + GPIO_OUT_SET) as *mut u32;
+const FUNC_GPIO_CLR: *mut u32 = (SIO_BASE_ADDR + GPIO_OUT_CLR) as *mut u32;
+
+
+const IO_BANK0: usize = 0x40014000;
+const GPIO15_CTRL: usize = 0x7C;
 
 #[entry]
 fn main() -> ! {
     unsafe {
-        let gpio_use_sio = (0x40014000 + 0x7C) as *mut u32; // Get the memory address using the IO_BANKO 0x40014000 and offset 0x7C for the GPIO15_CTRL
+        
+        let gpio_use_sio = (IO_BANK0 + GPIO15_CTRL) as *mut u32; // Get the memory address using the IO_BANKO 0x40014000 and GPIO15_CTRL 0x7C
         *gpio_use_sio = 0x5; // FUNCSEL = 5 for SIO
     }
     loop {
-        
+        // Turn GPIO15 (LED) ON
+        unsafe { GPIO_OUT_CLR.write_volatile(1 << 15); }
+
+        // Delay
+        for _ in 0..100_000 {
+            cortex_m::asm::nop();
+        }
+
+        // Turn GPIO15 (LED) OFF
+        unsafe { GPIO_OUT_SET.write_volatile(1 << 15); }
     }
 }
